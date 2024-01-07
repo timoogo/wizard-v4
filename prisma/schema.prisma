@@ -1,0 +1,20 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/client"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = "postgresql://postgres:0100@localhost:5432/wizard_generator"
+}
+
+model User {
+  id            Int       @id @default(autoincrement())
+  username      String
+  email         String
+  password_hash String
+  created_at    DateTime? @default(now())
+
+  @@map("users")
+}
