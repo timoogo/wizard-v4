@@ -3,27 +3,35 @@ import { useRouter } from 'next/router';
 import { GetServerSideProps, NextPage } from 'next';
 import { API_ROUTES } from '@/constants/api.routes.constants';
 import {PrismaClient} from "@/prisma/generated/client";
+import {UserFront} from "@/pages/users";
 
 interface EditUserProps {
-    user: UserData;
-}
-type UserData = {
-    id: string;
-    username: string;
-    email: string;
-    password_hash: string;
-    created_at: string | null;
+    user: UserFront;
 }
 
 const EditUserPage: NextPage<EditUserProps> = ({ user }) => {
-    const [username, setUsername] = useState(user?.username || '');
-    const [email, setEmail] = useState(user?.email || '');
-    // Autres champs...
-
+    const [formData, setFormData] = useState(user);
     const router = useRouter();
 
+    // Liste des champs non modifiables
+    const nonEditableFields = ['id','password_hash','created_at', 'updated_at'];
+
+    // Gestionnaire de changement pour les champs modifiables
+    const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+        setFormData({ ...formData, [event.target.name]: event.target.value });
+    };
+
+    // Gestionnaire de soumission du formulaire
     const handleSubmit = async (event: FormEvent) => {
         event.preventDefault();
+
+        // Filtrer les champs non modifiables
+        const dataToUpdate = Object.keys(formData).reduce((acc: any, key) => {
+            if (!nonEditableFields.includes(key)) {
+                acc[key] = formData[key];
+            }
+            return acc;
+        }, {});
 
         try {
             const res = await fetch(`${API_ROUTES.USERS}/${user.id}`, {
@@ -31,7 +39,7 @@ const EditUserPage: NextPage<EditUserProps> = ({ user }) => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ username, email }),
+                body: JSON.stringify(dataToUpdate),
             });
 
             if (!res.ok) {
@@ -49,53 +57,31 @@ const EditUserPage: NextPage<EditUserProps> = ({ user }) => {
             {/* eslint-disable-next-line react/no-unescaped-entities */}
             <h1>Modifier l'Utilisateur</h1>
             <form onSubmit={handleSubmit}>
-                <div>
-                    <label htmlFor="username">Nom d'utilisateur</label>
-                    <input
-                        id="username"
-                        name="username"
-                        type="text"
-                        value={username}
-                        onChange={(event) => setUsername(event.target.value)}
-                    />
-                </div>
-
-                <div>
-                    <label htmlFor="email">Email</label>
-                    <input
-                        id="email"
-                        name="email"
-                        type="text"
-                        value={email}
-                        onChange={(event) => setEmail(event.target.value)}
-                    />
-                </div>
-                <div>
-                    <label htmlFor="password_hash">Mot de passe</label>
-                    <input
-                        id="password_hash"
-                        name="password_hash"
-                        type="password"
-                        value={user.password_hash}
-                        onChange={(event) => setEmail(event.target.value)}
-                    />
-                </div>
-                <div>
-                    <label htmlFor="created_at">Date de création</label>
-                    <input
-                        id="created_at"
-                        name="created_at"
-                        type="text"
-                        value={user.created_at}
-                        onChange={(event) => setEmail(event.target.value)}
-                    />
-                </div>
+                {Object.keys(formData).map((key) => {
+                    if (nonEditableFields.includes(key) || key === 'password_hash') {
+                        // Exclure le champ password_hash et les champs non modifiables du rendu
+                        return null;
+                    } else {
+                        // Rendre les champs modifiables
+                        return (
+                            <div key={key}>
+                                <label htmlFor={key}>{key}</label>
+                                <input
+                                    id={key}
+                                    name={key}
+                                    type="text"
+                                    value={formData[key]}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                        );
+                    }
+                })}
                 <button type="submit">Mettre à jour</button>
             </form>
         </>
     );
 };
-
 export default EditUserPage;
 
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
@@ -111,6 +97,7 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
     const serializedUser = {
         ...user,
         created_at: user?.created_at ? user?.created_at.toISOString() : user?.created_at,
+        updated_at: user?.updated_at ? user?.updated_at.toISOString() : user?.updated_at,
     };
 
     return {

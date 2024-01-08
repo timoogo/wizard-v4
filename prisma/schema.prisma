@@ -14,7 +14,19 @@ model User {
   username      String
   email         String
   password_hash String
-  created_at    DateTime? @default(now())
+  created_at    DateTime  @default(now())
+  updated_at    DateTime? @updatedAt
 
   @@map("users")
+}
+
+model Client {
+  id         Int       @id @default(autoincrement())
+  name       String
+  email      String
+  phone      String
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
+
+  @@map("clients")
 }
