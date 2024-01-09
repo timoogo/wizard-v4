@@ -1,17 +1,14 @@
   import React, { useState, useEffect } from "react";
   import router from "next/router";
   import Link from "next/link";
-  import Paginator from "@/components/Paginator";
+  import Paginator from "@/librairy/components/Paginator";
   import { PrismaClient, User } from "@/prisma/generated/client";
   import Head from "next/head";
-  import {useLocalStorage} from "@/hooks/useLocalStorage";
+  import {ColumnSelection} from "@/librairy/types/ColumnSelection";
+  import {UserFront} from "@/librairy/interfaces/UserFront";
 
-  export interface UserFront extends User {
-    [key: string]: any;
-  }
-  interface ColumnSelection {
-    [key: string]: boolean;
-  }
+
+
 
   interface UsersPageProps {
     users: UserFront[];

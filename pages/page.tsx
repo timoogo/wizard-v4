@@ -1,4 +1,4 @@
-import StatCard from '@/components/StatCard';
+import StatCard from '@/librairy/components/StatCard';
 import React from 'react';
 import { FaUser, FaTags, FaCalendar, FaBuilding } from 'react-icons/fa';
 import {PrismaClient} from "@prisma/client";

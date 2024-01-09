@@ -1,13 +1,11 @@
 import React from 'react';
 import { FaUser } from 'react-icons/fa';
-import StatCard from '@/components/StatCard';
+import StatCard from '@/librairy/components/StatCard';
 import { PrismaClient } from '@/prisma/generated/client'
 import Head from "next/head";
-import Header from "@/components/Header";
 
 interface StatData {
     totalUsers: number;
-    // Ajoutez d'autres statistiques selon vos besoins
 }
 
 const IndexPage = ({ statData }: { statData: StatData }) => {
@@ -31,12 +29,12 @@ const IndexPage = ({ statData }: { statData: StatData }) => {
                         accessibilityLabel='Total Users'
                     />
                     <StatCard
-                        title="Total Users"
+                        title="Total Clients"
                         value={`${statData.totalUsers}`}
-                        description="Total Users"
+                        description="Total clients"
                         icon={<FaUser />}
-                        redirection='/users'
-                        accessibilityLabel='Total Users'
+                        redirection='/clients'
+                        accessibilityLabel='Total clients'
                     />
                     {/* Ajoutez plus de composants StatCard pour d'autres statistiques */}
                 </div>

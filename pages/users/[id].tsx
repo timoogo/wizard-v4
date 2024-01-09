@@ -1,11 +1,9 @@
 import { GetServerSideProps, NextPage } from 'next';
 import React from 'react';
 import {PrismaClient} from "@/prisma/generated/client";
-import {API_ROUTES} from "@/constants/api.routes.constants";
-import {UserFront} from "@/pages/users/index";
 import Head from 'next/head';
-import Link from "next/link";
-
+import Link from "next/link"
+import {UserFront} from "@/librairy/interfaces/UserFront";
 
 export interface UserDetailsProps {
   user: UserFront | null;

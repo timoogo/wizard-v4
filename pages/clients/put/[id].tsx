@@ -2,9 +2,8 @@ import { ChangeEvent, FormEvent, useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { GetServerSideProps, NextPage } from 'next';
 import {PrismaClient} from "@/prisma/generated/client";
-import {UserFront} from "@/pages/users";
+import {UserFront} from "@/librairy/interfaces/UserFront";
 import {API_ROUTES} from "@/librairy/constants/api.routes.constants";
-
 
 interface EditUserProps {
     user: UserFront;
