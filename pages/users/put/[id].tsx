@@ -1,9 +1,9 @@
 import { ChangeEvent, FormEvent, useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { GetServerSideProps, NextPage } from 'next';
-import {PrismaClient} from "@/prisma/generated/client";
-import {UserFront} from "@/pages/users";
+import prisma from "@/prisma/prisma";
 import {API_ROUTES} from "@/librairy/constants/api.routes.constants";
+import {UserFront} from "@/librairy/interfaces/UserFront";
 
 
 interface EditUserProps {
@@ -87,9 +87,6 @@ export default EditUserPage;
 
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
     const { id } = params!;
-    const prisma = new PrismaClient({
-        log: ['query', 'info', 'warn', 'error'],
-    });
     const user = await prisma.user.findUnique({
         where: {
             id: Number(id),

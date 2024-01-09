@@ -8,7 +8,7 @@ export default async function handler(
 ) {
     if (req.method === 'POST') {
         try {
-            const prisma = new PrismaClient();
+            
             const { id, ...data } = req.body;
             const updatedUser = await prisma.user.create({
                 data,

@@ -1,7 +1,7 @@
-        import React from 'react';
-    import './styles/_global.css';
-    import {QueryClient, QueryClientProvider} from "react-query";
-    import Header from "@/librairy/components/Header";
+import React from 'react';
+import './styles/_global.css';
+import {QueryClient, QueryClientProvider} from "react-query";
+import Header from "@/librairy/components/Header";
 
     interface AppProps {
         Component: React.ComponentType;

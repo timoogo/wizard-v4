@@ -94,7 +94,7 @@ const GenericPage: React.FC<GenericPageProps> = ({ genericEntities, entityConfig
   );
 };
 export async function getServerSideProps() {
-  const prisma = new PrismaClient();
+  
   try {
     const genericEntities = await prisma.user.findMany();
     const entityConfig = {

@@ -98,7 +98,7 @@ const GenericForm: React.FC<GenericFormProps> = ({ entityName, formFields }) => 
 };
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const prisma = new PrismaClient();
+  
   const entityName = 'user';
 
 

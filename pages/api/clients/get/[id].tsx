@@ -5,7 +5,7 @@ import { PrismaClient } from '@/prisma/generated/client';
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method === 'POST') {
         try {
-            const prisma = new PrismaClient();
+            
             const { id, ...data } = req.body;
             const updatedUser = await prisma.user.update({
                 where: { id: Number(id) },
