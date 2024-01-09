@@ -71,7 +71,7 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
         updated_at: genericEntity?.updated_at ? genericEntity?.updated_at.toISOString() : genericEntity?.updated_at,
         entityConfig: {
             entityName: 'user',
-            displayNameProperty: 'Client',
+            displayNameProperty: 'Clients',
             excludedColumns: ['password_hash'],
             entityPath: 'users',
         }

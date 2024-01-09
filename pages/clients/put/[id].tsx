@@ -4,6 +4,7 @@ import { GetServerSideProps, NextPage } from 'next';
 import {PrismaClient} from "@/prisma/generated/client";
 import {UserFront} from "@/librairy/interfaces/UserFront";
 import {API_ROUTES} from "@/librairy/constants/api.routes.constants";
+// import reader prisma/reader
 
 interface EditUserProps {
     user: UserFront;
@@ -85,6 +86,8 @@ const EditUserPage: NextPage<EditUserProps> = ({ user }) => {
 export default EditUserPage;
 
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
+
+    // reader prisma
     const { id } = params!;
     const prisma = new PrismaClient({
         log: ['query', 'info', 'warn', 'error'],

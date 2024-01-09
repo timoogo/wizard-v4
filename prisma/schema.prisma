@@ -25,6 +25,12 @@ model User {
   @@map("users")
 }
 
+enum Color {
+  RED
+  GREEN
+  BLUE
+}
+
 model Client {
   id         Int       @id @default(autoincrement())
   name       String
@@ -34,4 +40,27 @@ model Client {
   updated_at DateTime? @updatedAt
 
   @@map("clients")
+}
+
+model Example {
+  id            Int      @id @default(autoincrement())
+  stringField   String
+  intField      Int
+  floatField    Float
+  booleanField  Boolean
+  dateTimeField DateTime @default(now())
+  jsonField     Json
+  bytesField    Bytes
+  decimalField  Decimal
+  bigintField   BigInt
+  color         Color    @default(RED)
+  optionalField String?
+  relatedId     Int
+  related       Related  @relation(fields: [relatedId], references: [id])
+}
+
+model Related {
+  id       Int       @id @default(autoincrement())
+  name     String
+  examples Example[]
 }
