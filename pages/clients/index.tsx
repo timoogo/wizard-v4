@@ -1,4 +1,4 @@
-import {createModelType} from "@/librairy/utils/reader";
+import {createModelType} from "@/librairy/utils/createModelType";
 
 const entityName = 'users';
 
@@ -114,7 +114,7 @@ const GenericPage: React.FC<GenericPageProps> = ({ genericEntities, entityConfig
   const jsonModelData: JsonModelData = JSON.parse(jsonData);
 
   // 6. Création d'un modèle à partir des données JSON pour une entité spécifique ("Clients" dans ce cas).
-  const modelEntity = createModelType("User", jsonModelData);
+  const modelEntity = createModelType("Example", jsonModelData);
 
   // 7. Affichage dans la console du nom du dernier dossier et de l'entité modèle générée.
   console.log(currentDir, modelEntity);

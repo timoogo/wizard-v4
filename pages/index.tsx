@@ -3,6 +3,8 @@ import { FaUser } from 'react-icons/fa';
 import StatCard from '@/librairy/components/StatCard';
 import { PrismaClient } from '@/prisma/generated/client'
 import Head from "next/head";
+import {modelToTypes} from "@/librairy/utils/modelToTypes";
+import path from "path";
 
 interface StatData {
     totalUsers: number;
@@ -45,6 +47,11 @@ const IndexPage = ({ statData }: { statData: StatData }) => {
 };
 
 export async function getServerSideProps() {
+    const jsonFilePath = path.join(process.cwd(), 'prisma/generated/json/json-schema.json');
+
+    const generateTypes = modelToTypes(jsonFilePath)
+
+    console.log(generateTypes)
     try {
         const prisma = new PrismaClient({
             log: ['query', 'info', 'warn', 'error'],

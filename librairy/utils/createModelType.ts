@@ -5,8 +5,9 @@ import prisma from "@/prisma/prisma";
 
 import React, { useState, useEffect } from 'react';
 import {GenericEntityFront, JsonModelData} from "@/librairy/interfaces/GenericModel";
+import {AvailableEntity} from "@/librairy/types/AvailableEntity";
 
-export const createModelType = (modelName: string, jsonModelData: any): GenericEntityFront | null => {
+export const createModelType = (modelName: AvailableEntity, jsonModelData: any): GenericEntityFront | null => {
     // Vérification de l'existence de la clé
     if (modelName in jsonModelData.definitions) {
         const modelDefinition = jsonModelData.definitions[modelName];
