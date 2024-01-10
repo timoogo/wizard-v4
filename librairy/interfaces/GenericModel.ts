@@ -4,7 +4,7 @@ export interface GenericEntityFront extends GenericModel {
     [key: string]: any;
 }
 
-type GenericModelPropertiesValue = "string" | "integer" | "number" | "boolean" | "object" | "array" | "null";
+export type GenericModelPropertiesValue = "string" | "integer" | "number" | "boolean" | "object" | "array" | "null";
 type GenericModelProperties = {
     type: GenericModelPropertiesValue | GenericModelPropertiesValue[];
     format?: string;
