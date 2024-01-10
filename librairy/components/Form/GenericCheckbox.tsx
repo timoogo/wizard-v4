@@ -1,9 +1,11 @@
 import React from 'react';
+import {CustomStyle} from "@/librairy/CustomStyle";
 
 interface LabelProps {
     label: string;
     labelColor?: string;  // Rendre labelColor optionnel
 }
+
 interface Props {
     field: string;
     checked: boolean;
@@ -13,21 +15,28 @@ interface Props {
 }
 
 export const GenericCheckbox = ({ field, checked, handleChange, id, labelData }: Props) => {
-    const labelColorClass = labelData?.labelColor ? `text-${labelData.labelColor}` : 'text-gray-700';
-    const labelColorAccentClass = labelData?.labelColor ? `text-${labelData.labelColor} focus:ring-${labelData.labelColor} dark:focus:ring-${labelData.labelColor}` : 'text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-600';
+    const style: CustomStyle = {
+        '--text-color': labelData?.labelColor || 'gray-700',
+        '--focus-ring-color': labelData?.labelColor || 'blue-500',
+    };
 
     return (
-        <div className={`flex items-center}`}>
+        <div className="flex items-center">
             <input
                 type="checkbox"
                 name={field}
                 id={id || field}
                 checked={checked}
                 onChange={handleChange}
-                className={`w-4 h-4 bg-gray-100 border-gray-300 rounded focus:ring-2 dark:bg-gray-700 dark:border-gray-600 ${labelColorAccentClass}`}
+                style={style}
+                className="w-4 h-4 bg-gray-100 border-gray-300 rounded focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
             />
             {labelData && (
-                <label htmlFor={id || field} className={`ml-2 text-sm font-medium ${labelColorClass}`}>
+                <label
+                    htmlFor={id || field}
+                    className="ml-2 text-sm font-medium"
+                    style={{ color: `var(--text-color)` }}
+                >
                     {labelData.label}
                 </label>
             )}

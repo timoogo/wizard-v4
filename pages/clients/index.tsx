@@ -1,10 +1,9 @@
 import {createModelType} from "@/librairy/utils/createModelType";
-
+import prisma from "@/prisma/prisma";
 const entityName = 'users';
 
 import React, { useState } from "react";
 import Head from "next/head";
-import { User } from "@/prisma/generated/client";
 import { FilterPopup } from "@/librairy/components/FilterPopup";
 import { TableContainer } from "@/librairy/components/TableContainer";
 import Paginator from "@/librairy/components/Paginator";

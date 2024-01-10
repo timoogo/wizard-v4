@@ -3,7 +3,6 @@ import prisma from "@/prisma/prisma";
 
 // fn(model) => DEFINNITION
 
-import React, { useState, useEffect } from 'react';
 import {GenericEntityFront, JsonModelData} from "@/librairy/interfaces/GenericModel";
 import {AvailableEntity} from "@/librairy/types/AvailableEntity";
 

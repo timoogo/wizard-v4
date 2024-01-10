@@ -3,7 +3,7 @@ import { FaUser } from 'react-icons/fa';
 import StatCard from '@/librairy/components/StatCard';
 import { PrismaClient } from '@/prisma/generated/client'
 import Head from "next/head";
-import {modelToTypes} from "@/librairy/utils/modelToTypes";
+import {modelToTypes} from "@/librairy/utils/modelToTypesV2";
 import path from "path";
 
 interface StatData {

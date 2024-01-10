@@ -6,14 +6,17 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "prisma:g": "npx prisma generate" ,
+    "prisma:g": "npx prisma generate",
     "lint": "next lint"
   },
   "dependencies": {
     "@heroicons/react": "^2.1.1",
     "@prisma/client": "^5.7.1",
+    "clsx": "^2.1.0",
     "libphonenumber-js": "^1.10.53",
     "next": "14.0.4",
+    "node-fetch": "^3.3.2",
+    "pluralize": "^8.0.0",
     "react": "^18",
     "react-dom": "^18",
     "react-icons": "^4.12.0",
@@ -21,6 +24,7 @@
   },
   "devDependencies": {
     "@types/node": "^20",
+    "@types/pluralize": "^0.0.33",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.0.1",

@@ -8,14 +8,15 @@ export default async function handler(
 ) {
     if (req.method === 'POST') {
         try {
-            
             const { id, ...data } = req.body;
             const updatedUser = await prisma.user.create({
-                data,
+                ...data,
+                created_at: new Date(), // Set the current timestamp
+                updated_at: null,      // Set updated_at as null
             });
             res.status(200).json(updatedUser);
         } catch (error) {
-            res.status(500).json({ error: "Erreur lors de la mise à jour de l'utilisateur" });
+            res.status(500).json({ error: "Erreur lors de la création de l'utilisateur" });
         }
     } else {
         res.setHeader('Allow', ['POST']);
