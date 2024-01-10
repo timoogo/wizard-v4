@@ -11,8 +11,7 @@ export default async function handler(
             const { id, ...data } = req.body;
             const updatedUser = await prisma.user.create({
                 ...data,
-                created_at: new Date(), // Set the current timestamp
-                updated_at: null,      // Set updated_at as null
+
             });
             res.status(200).json(updatedUser);
         } catch (error) {

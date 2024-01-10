@@ -90,9 +90,8 @@ const GenericFormPage: React.FC<GenericFormProps> = ({ entityName, formFields, f
       console.log('Entité créée avec succès:', await response.json());
       // Redirection ou mise à jour de l'état ici
     } catch (error) {
-
-      response.status(500).json({ error: "Erreur lors de la mise à jour de l'utilisateur", message: error.message });
-
+        // Gérer les erreurs ici
+        console.error(error);
     }
   };
 

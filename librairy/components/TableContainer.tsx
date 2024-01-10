@@ -8,9 +8,10 @@ interface TableContainerProps {
     selectedColumns: Record<string, boolean>;
     excludedColumns: string[];
     entityPath: string;
+    modelEntity: any;
 }
 
-export const TableContainer: React.FC<TableContainerProps> = ({ data, selectedColumns, excludedColumns, entityPath }) => (
+export const TableContainer: React.FC<TableContainerProps> = ({ data, selectedColumns, excludedColumns, entityPath, modelEntity }) => (
     <div className="overflow-hidden rounded-lg border border-gray-200 shadow-md m-5">
         <table className="min-w-full divide-y divide-gray-200">
             <TableHeader

@@ -1,179 +1,136 @@
-import React, { useState, useEffect } from "react";
-import router from "next/router";
-import Link from "next/link";
-import Paginator from "@/librairy/components/Paginator";
+import React, { useState } from "react";
 import Head from "next/head";
-import {ColumnSelection} from "@/librairy/types/ColumnSelection";
-import {UserFront} from "@/librairy/interfaces/UserFront";
+import Link from "next/link";
+import path from "path";
+import * as fs from "fs";
+
 import prisma from "@/prisma/prisma";
+import { FilterPopup } from "@/librairy/components/FilterPopup";
+import { TableContainer } from "@/librairy/components/TableContainer";
+import Paginator from "@/librairy/components/Paginator";
+import { ColumnSelection } from "@/librairy/types/ColumnSelection";
+import { useTransformDate} from "@/librairy/hooks/useTransformDate";
+import { DateAndTimeFormatEnum, DateFormatEnum } from "@/librairy/types/DateFormat";
+import { JsonModelData} from "@/librairy/interfaces/GenericModel";
+import { createModelType} from "@/librairy/utils/createModelType";
+import { getLastFolderName} from "@/librairy/utils/getLastFolderName";
+import { GenericPageProps} from "@/librairy/types/GenericProp";
+import { init } from "@/librairy";
+import pluralize from "pluralize";
+import capitalizeAndRemoveLast from "@/librairy/utils/capitalizeAndRemoveLast";
 
 
 
-interface UsersPageProps {
-  users: UserFront[];
-}
-
-const excludedColumns = ["password_hash"];
-
-const UsersPage = ({ users }: UsersPageProps) => {
 
 
-  // Page title
-  const pageTitle = "Dashboard des utilisateurs";
-
-  // State for items per page and current page
+const GenericPage: React.FC<GenericPageProps> = ({ genericEntities, entityConfig, modelEntity }) => {
+  const pageTitle = `${entityConfig.entityName}'s Dashboard`;
   const [itemsPerPage, setItemsPerPage] = useState(4);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showFilterPopup, setShowFilterPopup] = useState(false);
 
-  // State for selected columns
-  const [selectedColumns, setSelectedColumns] = useState<{
-    [key: string]: boolean;
-  }>(() => {
-
-
-    // Initialize selectedColumns from local storage
-
-
-    // If no saved columns, initialize with all columns
+  const handleColumnChange = (column: string, value: boolean) => {
+    setSelectedColumns((prev) => ({
+      ...prev,
+      [column]: value,
+    }));
+  };
+  // Initialize selectedColumns from local storage or with all columns selected by default
+  const excludedColumns = ["password_hash"];
+  const [selectedColumns, setSelectedColumns] = useState<ColumnSelection>(() => {
     const initialColumns: ColumnSelection = {};
-    if (users.length > 0) {
-      Object.keys(users[0]).forEach((key) => {
-        initialColumns[key] = true; // Toutes les colonnes sont sélectionnées par défaut
+    if (genericEntities.length > 0) {
+      Object.keys(genericEntities[0]).forEach((key) => {
+        initialColumns[key] = true; // All columns are selected by default
       });
     }
     return initialColumns;
   });
 
-  // State to control filter popup visibility
-  const [showFilterPopup, setShowFilterPopup] = useState(false);
-
-
-  // Function to render the filter popup
-  const FilterPopup = () => (
-      <div className="filter-popup bg-white shadow-lg rounded-lg p-4 w-full flex flex-col">
-        {/* Flex layout for overall alignment */}
-        {Object.keys(selectedColumns)
-            .filter((key) => !excludedColumns.includes(key)) // Filtrez les clés à exclure
-            .map((key) => (
-                <div key={key} className="flex items-center mb-4">
-                  {/* Flexbox layout for each filter item */}
-                  <label className="flex-grow font-medium text-gray-700">
-                    <input
-                        type="checkbox"
-                        className="mr-2 leading-tight"
-                        checked={selectedColumns[key]}
-                        onChange={(e) => {
-                          setSelectedColumns((prev) => ({
-                            ...prev,
-                            [key]: e.target.checked,
-                          }));
-                        }}
-                    />
-                    {key}
-                  </label>
-                </div>
-            ))}
-        <div className="mt-auto flex justify-end">
-          {/* Aligns the button to the bottom-right */}
-          <button
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-              onClick={() => {
-                setShowFilterPopup(false);
-              }}
-          >
-            Fermer
-          </button>
-        </div>
-      </div>
-  );
-
-
-  // Function to render table headers based on selected columns
-  const renderTableHeaders = () => (
-      <tr>
-        {Object.keys(selectedColumns).map(
-            (key) => selectedColumns[key] && !excludedColumns.includes(key) && (
-                <th key={key} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {key}
-                </th>
-            )
-        )}
-      </tr>
-  );
-
-// Function to render a table row based on selected columns
-  const renderTableRow = (user: UserFront) => (
-      <tr key={user.id}>
-        {Object.keys(user).map(
-            (key) =>
-                selectedColumns[key] && !excludedColumns.includes(key) && (
-                    <td key={key} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {key === "username" ? (
-                          <Link href={`/users/${user.id}`} className={"text-indigo-600 hover:text-indigo-900"}>{user[key]}</Link>
-                      ) : (
-                          user[key]
-                      )}
-                    </td>
-                )
-        )}
-      </tr>
-  );
-
-  // Filter the current users based on selected columns
-  const currentUsers = users.slice(
+  const currentEntities = genericEntities.slice(
       (currentPage - 1) * itemsPerPage,
       currentPage * itemsPerPage
   );
 
-  // Return the JSX content
   return (
       <>
         <Head>
           <title>{pageTitle}</title>
         </Head>
-        <div>
-          {/* Button to show/hide filter popup */}
-          <button className="mx-8 px-4 py-2" onClick={() => setShowFilterPopup(prev => !prev)}>
-            Filtrer les Colonnes
-          </button>
-          {showFilterPopup && <FilterPopup />}
-          {/* Table to display users */}
+        <div className="container mx-auto">
+          <button onClick={() => setShowFilterPopup(!showFilterPopup)}>Filtrer les Colonnes</button>
+          {showFilterPopup && (
+              <FilterPopup
+                    excludedColumns={excludedColumns}
+                  selectedColumns={selectedColumns}
+                  onChange={handleColumnChange}
+                    onClose={() => setShowFilterPopup(false)}
+
+              />
+          )}
           <div className="overflow-hidden rounded-lg border border-gray-200 shadow-md m-5">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-              {renderTableHeaders()}
-              </thead>
-              <tbody className="divide-y divide-gray-100 border-t border-gray-100">
-              {currentUsers.map((user) => renderTableRow(user))}
-              </tbody>
-            </table>
-            <Paginator
-                currentPage={currentPage}
-                totalPages={Math.ceil(users.length / itemsPerPage)}
-                itemsPerPage={itemsPerPage}
-                onPageChange={setCurrentPage}
-                onItemsPerPageChange={setItemsPerPage}
-                items={currentUsers}
-            />
+            <TableContainer
+                data={genericEntities}
+                selectedColumns={selectedColumns}
+                entityPath={entityConfig.entityName} // Nom de l'entité
+                excludedColumns={excludedColumns}
+                modelEntity={modelEntity}/>
           </div>
+          <Paginator
+              currentPage={currentPage}
+              totalPages={Math.ceil(genericEntities.length / itemsPerPage)}
+              itemsPerPage={itemsPerPage}
+              onPageChange={setCurrentPage}
+              onItemsPerPageChange={setItemsPerPage}
+              items={currentEntities}
+          />
 
-
+          <Link
+              className="px-6 py-2 rounded-md text-white transition duration-200 ease-in-out bg-blue-600 hover:bg-blue-700"
+              href={`/${entityConfig.entityName}/post`}>Create a {entityConfig.entityName}</Link>
         </div>
       </>
   );
 };
-
-// Fetch users data from the server
 export async function getServerSideProps() {
-  const users = await prisma.user.findMany();
-  //@ts-ignore
-  const serializedUsers = users.map((user) => ({
-    ...user,
-    created_at: user.created_at ? user.created_at.toISOString() : null,
-    updated_at: user.updated_at ? user.updated_at.toISOString() : null,
-  }));
+  const currentFolder = getLastFolderName(path.dirname(new URL(import.meta.url).pathname));
+  console.log("currentFolder!!!!", currentFolder)
+  const jsonModelData =init(currentFolder);
+  const entityName = capitalizeAndRemoveLast(currentFolder)
+  // @ts-ignore
+  const arrCurrentFolder = [...currentFolder]
+  arrCurrentFolder.pop()
+  const tableName = arrCurrentFolder.join('')
+  // // 6. Création d'un modèle à partir des données JSON pour une entité spécifique ("Clients" dans ce cas).
+   const modelEntity = createModelType(entityName, jsonModelData);
 
-  return { props: { users: serializedUsers } };
+  //
+
+  try {
+    // @ts-ignore
+    
+    const genericEntities = await (prisma[tableName] as unknown as any).findMany();
+    // 8. Interrogation de la base de données pour récupérer toutes les entités 'user'.
+
+    // 9. Configuration de l'entité, spécifiant le nom de l'entité, la propriété à afficher et les colonnes à exclure.
+    const entityConfig = {
+      entityName: currentFolder.toUpperCase(),
+      displayNameProperty: entityName,
+      excludedColumns: ["password_hash"],
+    };
+    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ",import.meta.url)
+
+    // 11. Retour des données transformées et de la configuration de l'entité en tant que props pour le composant.
+    return  { props: { genericEntities, modelEntity, entityConfig } };
+  } catch (error) {
+    // 12. Gestion des erreurs potentielles lors de l'interrogation de la base de données.
+    console.error(error);
+
+    return { props: { genericEntities: [], modelEntity:{}, entityConfig: null } };
+  } finally {
+    // 13. Déconnexion de Prisma pour éviter les fuites de connexion.
+    await prisma.$disconnect();
+  }
 }
 
-export default UsersPage;
+export default GenericPage;

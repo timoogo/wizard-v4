@@ -27,7 +27,7 @@ const UserDetails: NextPage<UserDetailsProps> = ({ user }) => {
       </div>
 
 
-          {/* Link pour modifier /users/put/{id} */}
+          {/* Link pour modifier /users/edit/{id} */}
           <Link href={`/users/put/${user.id}`}>Modifier</Link>
 
     </>

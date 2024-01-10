@@ -43,7 +43,6 @@ export async function getServerSideProps() {
     // Sérialisation des utilisateurs
     const serializedUsers = users.map((user: any) => ({
       ...user,
-      created_at: user.created_at ? user.created_at.toISOString() : user.created_at,
     }));
 
     // Préparation des données supplémentaires (autres requêtes ou calculs)
