@@ -23,40 +23,14 @@ model User {
   @@map("users")
 }
 
-enum Color {
-  RED
-  GREEN
-  BLUE
-}
+model Book {
+  id          Int    @id @default(autoincrement())
+  title       String
+  description String
+  author      String
+  price       Float
+  image       String
+  user_id     Int
 
-model Client {
-  id    Int    @id @default(autoincrement())
-  name  String
-  email String
-  phone String
-
-  @@map("clients")
-}
-
-model Example {
-  id            Int      @id @default(autoincrement())
-  stringField   String
-  intField      Int
-  floatField    Float
-  booleanField  Boolean
-  dateTimeField DateTime @default(now())
-  jsonField     Json
-  bytesField    Bytes
-  decimalField  Decimal
-  bigintField   BigInt
-  color         Color    @default(RED)
-  optionalField String?
-  relatedId     Int
-  related       Related  @relation(fields: [relatedId], references: [id])
-}
-
-model Related {
-  id       Int       @id @default(autoincrement())
-  name     String
-  examples Example[]
+  @@map("books")
 }

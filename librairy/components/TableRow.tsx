@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from "next/link";
+import {getEditURLFor, getReadURLFor} from "@/helpers/routesHelpers";
 
 interface TableRowProps {
     item: Record<string, any>;
@@ -12,14 +13,24 @@ interface TableRowProps {
 export const TableRow: React.FC<TableRowProps> = ({ item, selectedColumns, excludedColumns, entityPath, numColumns }) => {
 
     const handleDelete = (id: string) => async () => {
-        const res = await fetch(`http://localhost:3001/api/${entityPath}/${id}`, {
-            method: 'DELETE',
-        });
-        if (res.status === 200) {
-            window.location.reload();
+        if (window.confirm("Are you sure you want to delete this item?")) {
+            try {
+                const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
+                const res = await fetch(`${baseURL}/api/${entityPath}/${id}`, {
+                    method: 'DELETE',
+                });
+
+                if (res.status === 200) {
+                    console.log('Item deleted successfully');
+                    window.location.reload();
+                } else {
+                    console.error('Failed to delete the item:', res.statusText);
+                }
+            } catch (error) {
+                console.error('Error during deletion:', error);
+            }
         }
     }
-
     const columnWidth = `calc(100% / ${numColumns + 1})`;
 
     return (
@@ -41,9 +52,9 @@ export const TableRow: React.FC<TableRowProps> = ({ item, selectedColumns, exclu
             >
                 <div className={`text-center`}>
 
-                <Link href={`/${entityPath}/${item.id}`}>View</Link>
+                <Link href={getReadURLFor(entityPath, item.id)}>View</Link>
                 {' | '}
-                <Link href={`/${entityPath}/put/${item.id}`}>Modify</Link>
+                <Link href={getEditURLFor(entityPath, item.id)}>Modify</Link>
                 {' | '}
                 {/*use handler to delete on button*/}
                 <button onClick={handleDelete(item.id)}>Delete</button>

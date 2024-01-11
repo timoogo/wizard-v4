@@ -1,26 +1,9 @@
 import { GetServerSideProps, NextPage } from 'next';
 import React from 'react';
-import {PrismaClient, User} from "@/prisma/generated/client";
 import Head from 'next/head';
 import Link from "next/link";
 
-
-export interface GenericEntityFront extends User {
-    [key: string]: any;
-    name: string;
-}
-
-interface GenericPageProps {
-    genericEntity: GenericEntityFront;
-    entityConfig: {
-        entityName: string;
-        displayNameProperty: string; // Propriété à utiliser pour le titre, par exemple: 'username' ou 'title'
-        excludedColumns: string[]; // Colonnes à exclure
-        entityPath: string;
-        // Ajouter d'autres configurations si nécessaire
-    };
-}
-
+import { GenericPageProps } from "@/librairy/types/GenericProp";
 
 const GenericDetails: NextPage<GenericPageProps> = ({
                                                         genericEntity,
@@ -57,29 +40,16 @@ const GenericDetails: NextPage<GenericPageProps> = ({
 
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
   const { id } = params!;
-     const prisma = new PrismaClient({
-        log: ['query', 'info', 'warn', 'error'],
-    });
+
     const genericEntity = await prisma.user.findUnique({
         where: {
         id: Number(id),
         },
     });
-    const serializedEntity = {
-        ...genericEntity,
-        created_at: genericEntity?.created_at ? genericEntity?.created_at.toISOString() : genericEntity?.created_at,
-        updated_at: genericEntity?.updated_at ? genericEntity?.updated_at.toISOString() : genericEntity?.updated_at,
-        entityConfig: {
-            entityName: 'user',
-            displayNameProperty: 'Clients',
-            excludedColumns: ['password_hash'],
-            entityPath: 'users',
-        }
-    };
 
   return {
     props: {
-      genericEntity: serializedEntity,
+      genericEntity: genericEntity,
     },
   };
 }

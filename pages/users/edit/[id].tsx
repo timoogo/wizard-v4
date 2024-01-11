@@ -4,38 +4,40 @@ import { GetServerSideProps, NextPage } from 'next';
 import {PrismaClient} from "@/prisma/generated/client";
 import {UserFront} from "@/librairy/interfaces/UserFront";
 import {API_ROUTES} from "@/librairy/constants/api.routes.constants";
+import {getEditURLFor} from "@/helpers/routesHelpers";
+import {headers} from "next/headers";
+import {getLastFolderName} from "@/librairy/utils/getLastFolderName";
+import path from "path";
+import {init} from "@/librairy";
+import capitalizeAndRemoveLast from "@/librairy/utils/capitalizeAndRemoveLast";
+import {GenericPageProps} from "@/librairy/types/GenericProp";
+import {createModelType} from "@/librairy/utils/createModelType";
+import fs from "fs";
+import {JsonModelData} from "@/librairy/interfaces/GenericModel";
+import {AvailableEntity} from "@/librairy/types/AvailableEntity";
 // import reader prisma/reader
 
-interface EditUserProps {
-    user: UserFront;
-}
-
-const EditUserPage: NextPage<EditUserProps> = ({ user }) => {
-    const [formData, setFormData] = useState(user);
+const GenericEditPage: NextPage<GenericPageProps> = ({ entity, genericEntity, nonEditableFields }) => {
+    const [formData, setFormData] = useState(entity);
     const router = useRouter();
 
-    // Liste des champs non modifiables
-    const nonEditableFields = ['id','password_hash','created_at', 'updated_at'];
-
-    // Gestionnaire de changement pour les champs modifiables
     const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [event.target.name]: event.target.value });
     };
 
-    // Gestionnaire de soumission du formulaire
     const handleSubmit = async (event: FormEvent) => {
         event.preventDefault();
 
-        // Filtrer les champs non modifiables
-        const dataToUpdate = Object.keys(formData).reduce((acc: any, key) => {
+        const dataToUpdate = Object.keys(formData).reduce((acc, key) => {
             if (!nonEditableFields.includes(key)) {
+                // @ts-ignore
                 acc[key] = formData[key];
             }
             return acc;
         }, {});
 
         try {
-            const res = await fetch(`${API_ROUTES.USERS}/${user.id}`, {
+            const res = await fetch(getEditURLFor(entity.genericEntity.toString(), entity.id ), {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -43,69 +45,82 @@ const EditUserPage: NextPage<EditUserProps> = ({ user }) => {
                 body: JSON.stringify(dataToUpdate),
             });
 
-            if (!res.ok) {
-                throw new Error('Erreur lors de la mise à jour de l’utilisateur');
+            if (res.ok) {
+                router.push(`/${entity.type}/${entity.id}`);
+            } else {
+                console.error('Failed to update the entity:', res.statusText);
             }
-
-            router.push(`/users/${user.id}`);
         } catch (error) {
-            console.error(error);
+            console.error('Error during update:', error);
         }
     };
 
     return (
         <>
-            {/* eslint-disable-next-line react/no-unescaped-entities */}
-            <h1>Modifier l'Utilisateur</h1>
+            <h1>Modifier {entity.genericEntity}</h1>
             <form onSubmit={handleSubmit}>
-                {Object.keys(formData).map((key) => {
-                    if (nonEditableFields.includes(key) || key === 'password_hash') {
-                        // Exclure le champ password_hash et les champs non modifiables du rendu
-                        return null;
-                    } else {
-                        // Rendre les champs modifiables
-                        return (
-                            <div key={key}>
-                                <label htmlFor={key}>{key}</label>
-                                <input
-                                    id={key}
-                                    name={key}
-                                    type="text"
-                                    value={formData[key]}
-                                    onChange={handleChange}
-                                />
-                            </div>
-                        );
-                    }
+                {Object.keys(formData).map(key => {
+                    if (nonEditableFields.includes(key)) return null;
+                    return (
+                        <div key={key}>
+                            <label htmlFor={key}>{key}</label>
+                            <input
+                                id={key}
+                                name={key}
+                                type="text"
+                                value={formData[key]}
+                                onChange={handleChange}
+                            />
+                        </div>
+                    );
                 })}
                 <button type="submit">Mettre à jour</button>
             </form>
         </>
     );
 };
-export default EditUserPage;
-
+export default GenericEditPage;
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
+    // Chemin vers le fichier JSON du schéma Prisma
+    const filePath = path.join(process.cwd(), 'prisma/generated/json/json-schema.json');
+    const jsonData = fs.readFileSync(filePath, 'utf8');
+    const jsonModelData: JsonModelData = JSON.parse(jsonData);
 
-    // reader prisma
-    const { id } = params!;
-    const prisma = new PrismaClient({
-        log: ['query', 'info', 'warn', 'error'],
-    });
-    const user = await prisma.user.findUnique({
-        where: {
-            id: Number(id),
-        },
-    });
-    const serializedUser = {
-        ...user,
-        created_at: user?.created_at ? user?.created_at.toISOString() : user?.created_at,
-        updated_at: user?.updated_at ? user?.updated_at.toISOString() : user?.updated_at,
-    };
+    // Déterminez l'entité à utiliser ici. Pour l'exemple, je vais utiliser 'User'
+    const entityName: AvailableEntity = "User";
+
+    // Génération du modèle à partir des données JSON
+    const modelEntity = createModelType(entityName, jsonModelData);
+
+    let formFields: string[] = [];
+    let formFieldsTypes: Record<string, string> = {};
+
+    if (modelEntity) {
+        // Filtrage des champs de formulaire basé sur le type des propriétés (par exemple, type 'string', 'integer' ou 'boolean')
+        let excludeFields = ['id', 'created_at', 'updated_at'];
+        // si un field dans excludedFields n'existe pas, on le ski
+        formFields = Object.keys(modelEntity).filter((field) => !excludeFields.includes(field));
+        formFieldsTypes = formFields.reduce((acc, field) => {
+            let fieldType = '';
+
+            if (modelEntity[field].type.includes('string')) {
+                fieldType = 'string';
+            } else if (modelEntity[field].type.includes('integer')) {
+                fieldType = 'integer';
+            } else if (modelEntity[field].type.includes('boolean')) {
+                fieldType = 'boolean';
+            }
+
+            return { ...acc, [field]: fieldType };
+        }, {});
+    }
 
     return {
         props: {
-            user: serializedUser,
+            entityName,
+            formFields,
+            formFieldsTypes,
+            excludeFields: ['id', 'created_at', 'updated_at'],
         },
     };
-}
+};

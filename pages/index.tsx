@@ -30,14 +30,7 @@ const IndexPage = ({ statData }: { statData: StatData }) => {
                         redirection='/users'
                         accessibilityLabel='Total Users'
                     />
-                    <StatCard
-                        title="Total Clients"
-                        value={`${statData.totalUsers}`}
-                        description="Total clients"
-                        icon={<FaUser />}
-                        redirection='/clients'
-                        accessibilityLabel='Total clients'
-                    />
+
                     {/* Ajoutez plus de composants StatCard pour d'autres statistiques */}
                 </div>
             </div>

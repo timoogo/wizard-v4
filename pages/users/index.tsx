@@ -9,15 +9,12 @@ import { FilterPopup } from "@/librairy/components/FilterPopup";
 import { TableContainer } from "@/librairy/components/TableContainer";
 import Paginator from "@/librairy/components/Paginator";
 import { ColumnSelection } from "@/librairy/types/ColumnSelection";
-import { useTransformDate} from "@/librairy/hooks/useTransformDate";
-import { DateAndTimeFormatEnum, DateFormatEnum } from "@/librairy/types/DateFormat";
-import { JsonModelData} from "@/librairy/interfaces/GenericModel";
 import { createModelType} from "@/librairy/utils/createModelType";
 import { getLastFolderName} from "@/librairy/utils/getLastFolderName";
 import { GenericPageProps} from "@/librairy/types/GenericProp";
 import { init } from "@/librairy";
-import pluralize from "pluralize";
 import capitalizeAndRemoveLast from "@/librairy/utils/capitalizeAndRemoveLast";
+import {getCreateURLFor} from "@/helpers/routesHelpers";
 
 
 
@@ -62,8 +59,8 @@ const GenericPage: React.FC<GenericPageProps> = ({ genericEntities, entityConfig
           {showFilterPopup && (
               <FilterPopup
                     excludedColumns={excludedColumns}
-                  selectedColumns={selectedColumns}
-                  onChange={handleColumnChange}
+                    selectedColumns={selectedColumns}
+                    onChange={handleColumnChange}
                     onClose={() => setShowFilterPopup(false)}
 
               />
@@ -87,7 +84,7 @@ const GenericPage: React.FC<GenericPageProps> = ({ genericEntities, entityConfig
 
           <Link
               className="px-6 py-2 rounded-md text-white transition duration-200 ease-in-out bg-blue-600 hover:bg-blue-700"
-              href={`/${entityConfig.entityName}/post`}>Create a {entityConfig.entityName}</Link>
+              href={getCreateURLFor(entityConfig.entityName)}>Create a {entityConfig.entityName}</Link>
         </div>
       </>
   );
@@ -114,7 +111,7 @@ export async function getServerSideProps() {
 
     // 9. Configuration de l'entité, spécifiant le nom de l'entité, la propriété à afficher et les colonnes à exclure.
     const entityConfig = {
-      entityName: currentFolder.toUpperCase(),
+      entityName: currentFolder,
       displayNameProperty: entityName,
       excludedColumns: ["password_hash"],
     };

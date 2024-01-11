@@ -1,6 +1,7 @@
 import { GenericEntityFront } from "@/librairy/interfaces/GenericModel";
 
 export interface  GenericPageProps {
+     [key: string]: any;
     genericEntities: GenericEntityFront[];
     modelEntity: any;
     entityConfig: {
