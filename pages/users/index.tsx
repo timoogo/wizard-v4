@@ -91,7 +91,6 @@ const GenericPage: React.FC<GenericPageProps> = ({ genericEntities, entityConfig
 };
 export async function getServerSideProps() {
   const currentFolder = getLastFolderName(path.dirname(new URL(import.meta.url).pathname));
-  console.log("currentFolder!!!!", currentFolder)
   const jsonModelData =init(currentFolder);
   const entityName = capitalizeAndRemoveLast(currentFolder)
   // @ts-ignore
@@ -115,7 +114,6 @@ export async function getServerSideProps() {
       displayNameProperty: entityName,
       excludedColumns: ["password_hash"],
     };
-    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   ",import.meta.url)
 
     // 11. Retour des données transformées et de la configuration de l'entité en tant que props pour le composant.
     return  { props: { genericEntities, modelEntity, entityConfig } };
