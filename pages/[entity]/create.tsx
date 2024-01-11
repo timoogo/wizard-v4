@@ -4,7 +4,7 @@ import { GetServerSideProps } from 'next';
 import path from 'path';
 import * as fs from 'fs';
 import { JsonModelData } from '@/librairy/interfaces/GenericModel';
-import { createModelType } from '@/librairy/utils/createModelType';
+import { getModelDefinition } from '@/librairy/utils/getModelDefinition';
 import { AvailableEntity } from '@/librairy/types/AvailableEntity';
 import {GenericCheckbox} from "@/librairy/components/Form/GenericCheckbox";
 import {GenericInputNumber} from "@/librairy/components/Form/GenericInputNumber";
@@ -163,7 +163,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
   const entityName: AvailableEntity = "User";
 
   // Génération du modèle à partir des données JSON
-  const modelEntity = createModelType(entityName, jsonModelData);
+  const modelEntity = getModelDefinition(entityName, jsonModelData);
 
   let formFields: string[] = [];
   let formFieldsTypes: Record<string, string> = {};

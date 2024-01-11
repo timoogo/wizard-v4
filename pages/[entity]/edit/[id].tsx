@@ -11,7 +11,7 @@ import path from "path";
 import {init} from "@/librairy";
 import capitalizeAndRemoveLast from "@/librairy/utils/capitalizeAndRemoveLast";
 import {GenericPageProps} from "@/librairy/types/GenericProp";
-import {createModelType} from "@/librairy/utils/createModelType";
+import {getModelDefinition} from "@/librairy/utils/getModelDefinition";
 import fs from "fs";
 import {JsonModelData} from "@/librairy/interfaces/GenericModel";
 import {AvailableEntity} from "@/librairy/types/AvailableEntity";
@@ -79,8 +79,17 @@ const GenericEditPage: NextPage<GenericPageProps> = ({ entity, genericEntity, no
         </>
     );
 };
+
 export default GenericEditPage;
-export const getServerSideProps: GetServerSideProps = async ({ params }) => {
+
+type ServerSideProps = {
+  params: {
+    id: string;
+    entity: string;    
+  }
+}
+
+export async function getServerSideProps(params: ServerSideProps) {
     // Chemin vers le fichier JSON du schéma Prisma
     const filePath = path.join(process.cwd(), 'prisma/generated/json/json-schema.json');
     const jsonData = fs.readFileSync(filePath, 'utf8');
@@ -90,7 +99,7 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
     const entityName: AvailableEntity = "User";
 
     // Génération du modèle à partir des données JSON
-    const modelEntity = createModelType(entityName, jsonModelData);
+    const modelEntity = getModelDefinition(entityName, jsonModelData);
 
     let formFields: string[] = [];
     let formFieldsTypes: Record<string, string> = {};

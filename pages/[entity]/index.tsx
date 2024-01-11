@@ -9,16 +9,12 @@ import { FilterPopup } from "@/librairy/components/FilterPopup";
 import { TableContainer } from "@/librairy/components/TableContainer";
 import Paginator from "@/librairy/components/Paginator";
 import { ColumnSelection } from "@/librairy/types/ColumnSelection";
-import { createModelType} from "@/librairy/utils/createModelType";
+import { getModelDefinition} from "@/librairy/utils/getModelDefinition";
 import { getLastFolderName} from "@/librairy/utils/getLastFolderName";
 import { GenericPageProps} from "@/librairy/types/GenericProp";
 import { init } from "@/librairy";
 import capitalizeAndRemoveLast from "@/librairy/utils/capitalizeAndRemoveLast";
 import {getCreateURLFor} from "@/helpers/routesHelpers";
-
-
-
-
 
 const GenericPage: React.FC<GenericPageProps> = ({ genericEntities, entityConfig, modelEntity }) => {
   const pageTitle = `${entityConfig.entityName}'s Dashboard`;
@@ -33,7 +29,7 @@ const GenericPage: React.FC<GenericPageProps> = ({ genericEntities, entityConfig
     }));
   };
   // Initialize selectedColumns from local storage or with all columns selected by default
-  const excludedColumns = ["password_hash"];
+  const excludedColumns = ["password"];
   const [selectedColumns, setSelectedColumns] = useState<ColumnSelection>(() => {
     const initialColumns: ColumnSelection = {};
     if (genericEntities.length > 0) {
@@ -89,30 +85,34 @@ const GenericPage: React.FC<GenericPageProps> = ({ genericEntities, entityConfig
       </>
   );
 };
-export async function getServerSideProps() {
-  const currentFolder = getLastFolderName(path.dirname(new URL(import.meta.url).pathname));
-  const jsonModelData =init(currentFolder);
-  const entityName = capitalizeAndRemoveLast(currentFolder)
-  // @ts-ignore
-  const arrCurrentFolder = [...currentFolder]
-  arrCurrentFolder.pop()
-  const tableName = arrCurrentFolder.join('')
-  // // 6. Création d'un modèle à partir des données JSON pour une entité spécifique ("Clients" dans ce cas).
-   const modelEntity = createModelType(entityName, jsonModelData);
 
-  //
+type ServerSideProps = {
+  params: {
+    entity: string;
+  }
+}
+
+export async function getServerSideProps(params: ServerSideProps) {
+  const { entity } = params.params;
+  const jsonModelData = init();
+  const entityName = capitalizeAndRemoveLast(entity)
+  // @ts-ignore
+  const arrEntity = [...entity]
+  arrEntity.pop()
+  const tableName = arrEntity.join('')
+  // // 6. Création d'un modèle à partir des données JSON pour une entité spécifique ("Clients" dans ce cas).
+  const modelEntity = getModelDefinition(entityName, jsonModelData);
 
   try {
     // @ts-ignore
-    
-    const genericEntities = await (prisma[tableName] as unknown as any).findMany();
+    const genericEntities = await (prisma[tableName] as unknown).findMany();
     // 8. Interrogation de la base de données pour récupérer toutes les entités 'user'.
 
     // 9. Configuration de l'entité, spécifiant le nom de l'entité, la propriété à afficher et les colonnes à exclure.
     const entityConfig = {
-      entityName: currentFolder,
+      entityName: entity,
       displayNameProperty: entityName,
-      excludedColumns: ["password_hash"],
+      excludedColumns: ["password"],
     };
 
     // 11. Retour des données transformées et de la configuration de l'entité en tant que props pour le composant.
